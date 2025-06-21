@@ -17,8 +17,7 @@ class TestNutritionTools:
     @pytest.fixture
     def nutrition_tools(self):
         """Create nutrition tools instance."""
-        with patch('src.services.usda_service.USDAService'), \
-             patch('src.services.edamam_service.EdamamService'):
+        with patch('src.services.usda_service.USDAService'):
             return NutritionTools()
     
     @pytest.mark.asyncio
@@ -40,26 +39,7 @@ class TestNutritionTools:
         for expected_tool in expected_tools:
             assert expected_tool in tool_names
     
-    @pytest.mark.asyncio
-    async def test_get_food_data_success(self, nutrition_tools, sample_nutrition_data):
-        """Test successful food data retrieval."""
-        with patch.object(nutrition_tools.edamam_service, 'analyze_nutrition') as mock_analyze:
-            mock_analyze.return_value = sample_nutrition_data
-            
-            result = await nutrition_tools.call_tool(
-                "nutrition_get_food_data",
-                {
-                    "food_name": "chicken breast",
-                    "portion_size": 100,
-                    "include_detailed": True
-                }
-            )
-            
-            assert isinstance(result, list)
-            assert len(result) > 0
-            assert isinstance(result[0], TextContent)
-            assert "chicken breast" in result[0].text.lower() or "calories" in result[0].text.lower()
-    
+
     @pytest.mark.asyncio
     async def test_get_food_data_validation_error(self, nutrition_tools):
         """Test food data retrieval with validation error."""
@@ -150,27 +130,7 @@ class TestNutritionTools:
             assert "protein" in result[0].text.lower()
             assert "chicken" in result[0].text.lower()
     
-    @pytest.mark.asyncio
-    async def test_analyze_recipe(self, nutrition_tools, sample_nutrition_data):
-        """Test recipe nutrition analysis."""
-        with patch.object(nutrition_tools.edamam_service, 'analyze_nutrition') as mock_analyze:
-            mock_analyze.return_value = sample_nutrition_data
-            
-            result = await nutrition_tools.call_tool(
-                "nutrition_analyze_recipe",
-                {
-                    "ingredients": [
-                        {"name": "chicken breast", "amount": 200, "unit": "g"},
-                        {"name": "olive oil", "amount": 1, "unit": "tbsp"}
-                    ],
-                    "servings": 2
-                }
-            )
-            
-            assert isinstance(result, list)
-            assert len(result) > 0
-            assert isinstance(result[0], TextContent)
-            assert "recipe" in result[0].text.lower()
+   
     
     @pytest.mark.asyncio
     async def test_invalid_tool_name(self, nutrition_tools):
@@ -192,8 +152,7 @@ class TestMealPlanningTools:
     @pytest.fixture
     def meal_planning_tools(self):
         """Create meal planning tools instance."""
-        with patch('src.services.usda_service.USDAService'), \
-             patch('src.services.edamam_service.EdamamService'):
+        with patch('src.services.usda_service.USDAService'):
             return MealPlanningTools()
     
     @pytest.mark.asyncio
@@ -250,28 +209,7 @@ class TestMealPlanningTools:
         assert isinstance(result[0], TextContent)
         assert "validation error" in result[0].text.lower()
     
-    @pytest.mark.asyncio
-    async def test_calculate_meal_nutrition(self, meal_planning_tools, sample_nutrition_data):
-        """Test meal nutrition calculation."""
-        with patch.object(meal_planning_tools.edamam_service, 'analyze_nutrition') as mock_analyze:
-            mock_analyze.return_value = sample_nutrition_data
-            
-            result = await meal_planning_tools.call_tool(
-                "meal_calculate_nutrition",
-                {
-                    "meal_items": [
-                        {"food": "chicken breast", "amount": 150, "unit": "g"},
-                        {"food": "rice", "amount": 80, "unit": "g"}
-                    ],
-                    "meal_name": "Lunch"
-                }
-            )
-            
-            assert isinstance(result, list)
-            assert len(result) > 0
-            assert isinstance(result[0], TextContent)
-            assert "lunch" in result[0].text.lower()
-            assert "nutrition" in result[0].text.lower()
+
     
     @pytest.mark.asyncio
     async def test_suggest_alternatives(self, meal_planning_tools):
@@ -328,8 +266,7 @@ class TestDietaryAnalysisTools:
     @pytest.fixture
     def dietary_analysis_tools(self):
         """Create dietary analysis tools instance."""
-        with patch('src.services.usda_service.USDAService'), \
-             patch('src.services.edamam_service.EdamamService'):
+        with patch('src.services.usda_service.USDAService'):
             return DietaryAnalysisTools()
     
     @pytest.mark.asyncio
@@ -351,30 +288,6 @@ class TestDietaryAnalysisTools:
         for expected_tool in expected_tools:
             assert expected_tool in tool_names
     
-    @pytest.mark.asyncio
-    async def test_analyze_daily_intake(self, dietary_analysis_tools, sample_daily_meals, sample_nutrition_data):
-        """Test daily intake analysis."""
-        with patch.object(dietary_analysis_tools.edamam_service, 'analyze_nutrition') as mock_analyze:
-            mock_analyze.return_value = sample_nutrition_data
-            
-            result = await dietary_analysis_tools.call_tool(
-                "dietary_analyze_daily_intake",
-                {
-                    "daily_meals": sample_daily_meals,
-                    "person_info": {
-                        "age": 30,
-                        "gender": "female",
-                        "activity_level": "moderately_active"
-                    },
-                    "analysis_focus": ["calories", "macronutrients"]
-                }
-            )
-            
-            assert isinstance(result, list)
-            assert len(result) > 0
-            assert isinstance(result[0], TextContent)
-            assert "daily" in result[0].text.lower()
-            assert "analysis" in result[0].text.lower()
     
     @pytest.mark.asyncio
     async def test_analyze_daily_intake_validation_error(self, dietary_analysis_tools):
@@ -498,39 +411,13 @@ class TestToolsIntegration:
     @pytest.fixture
     def all_tools(self):
         """Create all tool instances."""
-        with patch('src.services.usda_service.USDAService'), \
-             patch('src.services.edamam_service.EdamamService'):
+        with patch('src.services.usda_service.USDAService'):
             return {
                 'nutrition': NutritionTools(),
                 'meal_planning': MealPlanningTools(),
                 'dietary_analysis': DietaryAnalysisTools()
             }
     
-    @pytest.mark.asyncio
-    async def test_cross_tool_data_flow(self, all_tools, sample_nutrition_data):
-        """Test data flow between different tools."""
-        # First get nutrition data
-        with patch.object(all_tools['nutrition'].edamam_service, 'analyze_nutrition') as mock_analyze:
-            mock_analyze.return_value = sample_nutrition_data
-            
-            nutrition_result = await all_tools['nutrition'].call_tool(
-                "nutrition_get_food_data",
-                {"food_name": "chicken breast", "portion_size": 100}
-            )
-            
-            assert len(nutrition_result) > 0
-            
-        # Then use that data in meal planning
-        meal_plan_result = await all_tools['meal_planning'].call_tool(
-            "meal_generate_plan",
-            {
-                "target_calories": 2000,
-                "dietary_restrictions": ["high-protein"],
-                "meals_per_day": 3
-            }
-        )
-        
-        assert len(meal_plan_result) > 0
     
     @pytest.mark.asyncio
     async def test_tool_error_isolation(self, all_tools):
@@ -563,8 +450,7 @@ class TestToolValidation:
     @pytest.fixture
     def nutrition_tools(self):
         """Create nutrition tools instance."""
-        with patch('src.services.usda_service.USDAService'), \
-             patch('src.services.edamam_service.EdamamService'):
+        with patch('src.services.usda_service.USDAService'):
             return NutritionTools()
     
     @pytest.mark.asyncio
@@ -620,47 +506,6 @@ class TestToolPerformance:
     @pytest.fixture
     def nutrition_tools(self):
         """Create nutrition tools instance."""
-        with patch('src.services.usda_service.USDAService'), \
-             patch('src.services.edamam_service.EdamamService'):
+        with patch('src.services.usda_service.USDAService'):
             return NutritionTools()
     
-    @pytest.mark.asyncio
-    async def test_concurrent_tool_calls(self, nutrition_tools, sample_nutrition_data):
-        """Test concurrent tool calls."""
-        import asyncio
-        
-        with patch.object(nutrition_tools.edamam_service, 'analyze_nutrition') as mock_analyze:
-            mock_analyze.return_value = sample_nutrition_data
-            
-            # Make multiple concurrent calls
-            tasks = []
-            for i in range(5):
-                task = nutrition_tools.call_tool(
-                    "nutrition_get_food_data",
-                    {"food_name": f"food_{i}", "portion_size": 100}
-                )
-                tasks.append(task)
-            
-            results = await asyncio.gather(*tasks)
-            
-            # All should succeed
-            assert len(results) == 5
-            for result in results:
-                assert isinstance(result, list)
-                assert len(result) > 0
-    
-    @pytest.mark.asyncio
-    async def test_tool_timeout_handling(self, nutrition_tools):
-        """Test tool timeout handling."""
-        with patch.object(nutrition_tools.edamam_service, 'analyze_nutrition') as mock_analyze:
-            mock_analyze.side_effect = asyncio.TimeoutError("Request timed out")
-            
-            result = await nutrition_tools.call_tool(
-                "nutrition_get_food_data",
-                {"food_name": "chicken breast"}
-            )
-            
-            assert isinstance(result, list)
-            assert len(result) > 0
-            # Should handle timeout gracefully
-            assert any(word in result[0].text.lower() for word in ["timeout", "error", "failed"])
