@@ -36,16 +36,22 @@ A comprehensive Model Context Protocol (MCP) server for food and nutrition intel
 To start the Food & Nutrition Intelligence MCP server:
 
 ```bash
-python -m src.server
+python3 main.py
 ```
 
 Or, if you have an entrypoint defined (e.g., via FastMCP CLI):
 
 ```bash
-fastmcp run src.server:create_server
+fastmcp run main.py
 ```
 
 The server exposes a set of MCP tools for nutrition data, meal planning, and dietary analysis. You can interact with it via a compatible MCP client or by integrating it into your AI workflow.
+
+# Run on debug mode
+
+```bash
+npx @modelcontextprotocol/inspector uv run main.py
+```
 
 ### Example API Usage
 
