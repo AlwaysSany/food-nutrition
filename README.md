@@ -15,7 +15,7 @@ A comprehensive Model Context Protocol (MCP) server for food and nutrition intel
 1. Install Python 3.11+ if not already installed.
 2. (Recommended) Create and activate a virtual environment:
    ```bash
-   python3.11 -m venv .venv
+   python3 -m venv .venv
    source .venv/bin/activate
    ```
 3. Install [UV](https://github.com/astral-sh/uv) (optional, for fast dependency management):
@@ -24,11 +24,7 @@ A comprehensive Model Context Protocol (MCP) server for food and nutrition intel
    ```
 4. Install project dependencies:
    ```bash
-   uv pip install -r requirements.txt  # If requirements.txt is present
-   # OR, using pyproject.toml (preferred):
-   uv pip install .
-   # Or with pip:
-   pip install .
+   uv sync
    ```
 
 ## Usage
@@ -36,7 +32,7 @@ A comprehensive Model Context Protocol (MCP) server for food and nutrition intel
 To start the Food & Nutrition Intelligence MCP server:
 
 ```bash
-python3 main.py
+uv run main.py
 ```
 
 Or, if you have an entrypoint defined (e.g., via FastMCP CLI):
