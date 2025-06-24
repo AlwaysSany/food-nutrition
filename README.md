@@ -1,6 +1,6 @@
 # Food & Nutrition Intelligence MCP Server
 
-A comprehensive Model Context Protocol (MCP) server for food and nutrition intelligence, providing tools, resources, and prompts for nutrition data retrieval, meal planning, and dietary analysis.
+A large MCP server project structure with food and nutrition intelligence, providing tools, resources, and prompts for nutrition data retrieval, meal planning, and dietary analysis.
 
 ## Features
 
